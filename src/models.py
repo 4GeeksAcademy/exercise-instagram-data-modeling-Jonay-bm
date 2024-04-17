@@ -12,29 +12,49 @@ class Follower(Base):
     # Here we define columns for the table person
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    user_name = Column(String(250), nullable=False)
+    user_from_id = Column(Integer, ForeignKey('user.id'))
+    user_to_id = Column(Integer, ForeignKey('user.id'))
 
 class User(Base):
     __tablename__ = 'user'
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    user_name = Column(String(250), nullable=False)
+    user_name = Column(String(250), nullable=False, unique=True)
     email = Column(String(250), nullable=False, unique=True)
     first_name = Column(String(250), nullable=False)
-    last_name = Column(String(250))
-    follower_id = Column(Integer, ForeignKey('follower.id'))
-    follower = relationship(Follower)
+    last_name = Column(String(250), nullable=False)
+    followers = relationship('Follower', backref='user', lazy=True)
+    posts = relationship('Post', backref='user', lazy=True)
+    comments = relationship('Comment', backref='user', lazy=True)
 
 class Post(Base):
     __tablename__ = 'post'
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    likes = Column(Integer)
-    comments = Column(String(250), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User)
+    comments = relationship('Comment', backref='post', lazy=True)
+    media = relationship('Media', backref='post', lazy=True)
+
+class Comment(Base):
+    __tablename__ = 'comment'
+    # Here we define columns for the table address.
+    # Notice that each column is also a normal Python instance attribute.
+    id = Column(Integer, primary_key=True)
+    comment_text = Column(String(250), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    post_id = Column(Integer, ForeignKey('post.id'))
+    
+
+class Media(Base):
+    __tablename__ = 'media'
+    # Here we define columns for the table address.
+    # Notice that each column is also a normal Python instance attribute.
+    id = Column(Integer, primary_key=True)
+    url = Column(String(250), nullable=False)
+    type = Column(String)
+    post_id = Column(Integer, ForeignKey('post.id'))
 
     def to_dict(self):
         return {}
